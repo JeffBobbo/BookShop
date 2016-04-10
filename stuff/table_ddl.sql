@@ -29,21 +29,30 @@ CREATE TABLE IF NOT EXISTS Book
   Title       VARCHAR(50) NOT NULL CONSTRAINT valid_book_title CHECK (Title != ''),
   Price       DECIMAL(10,2) NOT NULL CONSTRAINT valid_book_price CHECK (Price > 0.0),
   CategoryID  INTEGER REFERENCES Category(CategoryID) ON DELETE SET NULL,
-  PublisherID INTEGER REFERENCES Publisher(PublisherID)
+  PublisherID INTEGER NOT NULL REFERENCES Publisher(PublisherID)
 );
 
 CREATE TABLE IF NOT EXISTS ShopOrder
 (
   ShopOrderID INTEGER PRIMARY KEY,
   OrderDate   DATE,
-  ShopID      INTEGER REFERENCES Shop(ShopID),
-  SalesRepID  INTEGER REFERENCES SalesRep(SalesRepID)
+  ShopID      INTEGER NOT NULL REFERENCES Shop(ShopID),
+  SalesRepID  INTEGER NOT NULL REFERENCES SalesRep(SalesRepID)
 );
 CREATE TABLE IF NOT EXISTS Orderline
 (
-  ShopOrderID       INTEGER REFERENCES ShopOrder(ShopOrderID),
-  BookID            INTEGER REFERENCES Book(BookID),
+  ShopOrderID       INTEGER NOT NULL REFERENCES ShopOrder(ShopOrderID),
+  BookID            INTEGER NOT NULL REFERENCES Book(BookID),
   Quantity          INTEGER CONSTRAINT valid_orderline_quantity CHECK (Quantity > 0),
   UnitSellingPrice  DECIMAL (10,2) CONSTRAINT valid_orderline_unitprice CHECK (UnitSellingPrice >= 0.0),
   PRIMARY KEY (ShopOrderID, BookID)
 )
+
+
+-- views
+CREATE OR REPLACE VIEW order_value AS
+  SELECT
+    ShopOrder.ShopOrderID as ShopOrderID,
+    SUM(UnitSellingPrice * Quantity) AS order_value
+    FROM
+    OrderLine RIGHT JOIN ShopOrder ON OrderLine.ShopOrderID = ShopOrder.ShopOrderID GROUP BY ShopOrder.ShopOrderID

@@ -20,7 +20,18 @@ SELECT CategoryID, COUNT(*) AS count, CAST(AVG(Price) AS decimal(10,2)) AS avera
 given a publisher name, produce a report of books ordered by year and month
   for each year and month, the report should show bookid, title, total number of orders, total quantity and total selling value (order and retail)
 */
-SELECT * FROM Book,OrderLine,ShopOrder WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND PublisherID = (SELECT PublisherID FROM Publisher WHERE Name = 'HarperCollins');
+SELECT
+  Book.*,
+  COUNT(Book.BookID) AS num_orders,
+  SUM(Quantity) AS quant_orderd,
+  TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') AS order_month,
+  SUM(Price*Quantity) AS retail_price,
+  SUM(UnitSellingPrice*Quantity) AS selling_price
+  FROM Book,OrderLine,ShopOrder
+  WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
+    PublisherID = (SELECT PublisherID FROM Publisher WHERE Name = 'HarperCollins')
+  GROUP BY Book.BookID, TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM')
+  ORDER BY TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') DESC
 
 /* task 5
 given a book id, produce the order history for that book
@@ -33,23 +44,12 @@ SELECT
   Price,
   UnitSellingPrice,
   Quantity,
-  order_value,
-  shop_name
-FROM
-  (SELECT
-    Title,
-    OrderDate,
-    Price,
-    UnitSellingPrice,
-    Quantity,
-    ShopOrder.ShopOrderID
-    FROM Book,OrderLine,ShopOrder WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND Book.BookID = 2) AS a
-  JOIN
-    (SELECT ShopOrder.ShopOrderID,
-      SUM(UnitSellingPrice*Quantity) AS order_value,
-      (SELECT Name FROM Shop WHERE ShopID = ShopOrder.ShopID) AS shop_name
-      FROM OrderLine RIGHT JOIN ShopOrder ON OrderLine.ShopOrderID = ShopOrder.ShopOrderID GROUP BY ShopOrder.ShopOrderID) AS b
-  ON  a.ShopOrderID = b.ShopOrderID
+  ShopOrder.ShopOrderID,
+  (SELECT Name FROM Shop WHERE ShopID = ShopOrder.ShopID) AS shop_name,
+  (SELECT order_value FROM order_value WHERE ShopOrderID = ShopOrder.ShopOrderID)
+  FROM Book,OrderLine,ShopOrder
+  WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
+    Book.BookID = 3
 
 /* task 6
 given start and end dates, produce a report showing the performance of each sales rep over that period
@@ -57,6 +57,16 @@ given start and end dates, produce a report showing the performance of each sale
   include all sales reps
 */
 --SELECT
+SELECT
+  SalesRepID,
+  (SELECT Name FROM SalesRep WHERE SalesRepID = ShopOrder.SalesRepID),
+  COUNT(DISTINCT(ShopOrder.ShopOrderID)) AS num_orders,
+  SUM(UnitSellingPrice*Quantity) AS total_order_value,
+  SUM(Quantity) AS total_order_quantity
+  FROM ShopOrder,OrderLine
+  WHERE ShopOrder.ShopOrderID = OrderLine.ShopOrderID AND
+    OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
+  GROUP BY SalesRepID ORDER BY total_order_value DESC
 
 /* task 7
 given a category id and discount percentage, apply a discount to the standard price of all books in that category
