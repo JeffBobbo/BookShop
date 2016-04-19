@@ -58,15 +58,19 @@ given start and end dates, produce a report showing the performance of each sale
 */
 --SELECT
 SELECT
-  SalesRepID,
-  (SELECT Name FROM SalesRep WHERE SalesRepID = ShopOrder.SalesRepID),
-  COUNT(DISTINCT(ShopOrder.ShopOrderID)) AS num_orders,
-  SUM(UnitSellingPrice*Quantity) AS total_order_value,
-  SUM(Quantity) AS total_order_quantity
-  FROM ShopOrder,OrderLine
-  WHERE ShopOrder.ShopOrderID = OrderLine.ShopOrderID AND
-    OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
-  GROUP BY SalesRepID ORDER BY total_order_value DESC
+  SalesRep.SalesRepID,
+  SalesRep.Name,
+  COALESCE(COUNT(DISTINCT(ShopOrder.ShopOrderID)), 0) AS num_orders,
+  COALESCE(SUM(UnitSellingPrice*Quantity), 0.0) AS total_order_value,
+  COALESCE(SUM(Quantity), 0) AS total_order_quantity
+  FROM
+      SalesRep
+    LEFT JOIN
+      ShopOrder ON SalesRep.SalesRepID = ShopOrder.SalesRepID
+    LEFT JOIN
+      OrderLine ON ShopOrder.ShopOrderID = OrderLine.ShopOrderID
+  WHERE OrderDate IS NULL OR OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
+  GROUP BY SalesRep.SalesRepID ORDER BY total_order_value DESC
 
 /* task 7
 given a category id and discount percentage, apply a discount to the standard price of all books in that category
