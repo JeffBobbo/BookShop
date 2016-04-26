@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>{% block title%}{%endblock%} - BookShop</title>
+
+<!--    <link rel="shortcut icon" href="/static/img/emhlogo.jpg"/>
+    <link rel="stylesheet" type="text/css" href="/static/hotel.css"/>-->
+
+    <!-- Bootstrap -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+    {% block head_css %}{% endblock %}
+
+    {% block head_js %}{% endblock %}
+  </head>
+
+  <body>
+    <header>
+      <div>
+        <a href="index">
+          <img class="logo" src="/static/img/emhlogo.jpg" alt="Logo" title="Emerald Mano Hotel"/>
+        </a>
+        <h1><a href="/">Emerald Manor Hotel</a></h1>
+
+        <ul class="nav">
+          <li><a title="Home" href="/">Home</a></li>
+          <li><a title="Rooms" href="/rooms">Rooms</a></li>
+          <li><a title="Booking" href="/booking">Booking</a></li>
+          <li><a title="Facilities" href="/facilities">Facilities</a></li>
+          <li><a title="Local Attractions" href="/attractions">Local Attractions</a></li>
+          <li><a title="Gallery" href="/gallery">Gallery</a></li>
+          <li><a title="Contact" href="/contact">Contact</a></li>
+          {% if "account" in session %}
+          <li><a title="Admin" href="/admin">Admin</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="clear">&nbsp;</div>
+    </header>
+
+    {% block body %}{% endblock %}
+
+    <footer>
+      <div class="contentRow">
+        <div class="span50">
+          <p class="textMargin">+44 (0) 1603 456162</p>
+          <p class="textMargin">Emerald Manhor Hotel, Newfound Court, Colney Lane,<br/> Cringleford, Norwich, NR4 7RJ</p>
+        </div>
+        <div class="span50">
+        {% if "account" in session %}
+          <a class="right textMargin" href="/dologout">Logout</a>
+        {% else %}
+          <a class="right textMargin" href="/login">Login</a>
+        {% endif %}
+        </div>
+        <div class="clear">&nbsp;</div>
+      </div>
+    </footer>
+  </body>
+</html>
