@@ -15,10 +15,5 @@ def loginDetails():
 def getConnection():
   details = loginDetails()
   connStr = "host='" + details["host"] + "' " + "dbname='" + details["name"] + "' " + "user='" + details["login"] + "' " + "password='" + details["password"] + "'"
-  return psycopg2.connect(connStr)
-
-# function to get a cursor and set the appropriate search path for us
-def setup(con):
-  cur = con.cursor()
-  cur.execute("SET search_path TO demo")
-  return cur;
+  con = psycopg2.connect(connStr)
+  return con, con.cursor()

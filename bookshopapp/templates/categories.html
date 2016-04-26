@@ -1,0 +1,79 @@
+{% extends "template.html" %}
+{% block title %}Categories{% endblock %}
+{% block head_js %}
+<script>
+$(document).ready(function() {
+  var confirm = $("#confirm");
+  if (confirm == null)
+    return;
+
+  confirm.change(function(){
+    if ($(this).is(':checked'))
+      $("#delete").removeClass("disabled").addClass("red").removeAttr("disabled");
+    else
+      $("#delete").removeClass("red").addClass("disabled").attr("disabled", true);
+  });
+});
+</script>
+{% endblock %}
+{% block body %}
+    <div class="grid flex">
+      <div class="col_6">
+        <table>
+          <thead>
+            <tr>
+              {% for h in head %}
+              <td>{{ h }}</td>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if uncategorized > 0 %}
+        {% if uncategorized != 1 %}
+        <p>There is {{ uncategorized }} uncategorized book</p>
+        {% else %}
+        <p>There are {{ uncategorized }} uncategorized books</p>
+        {% endif %}
+        {% endif %}
+      </div>
+      <div class="col_6">
+        <div>
+          <h4>Add new category</h4>
+          <form action="/categories/add" method="post">
+            <p>Category ID</p><input name="cid" type="number" value="{{ nextID }}" class="disabled" readonly/><br/>
+            <p>Category name</p><input name="cname" type="text"/><br/>
+            <p>Category type</p><select name="ctype">
+              <option value="fiction">Fiction</option>
+              <option value="Non-fiction">Non-fiction</option>
+            </select><br/><br/>
+            <button type="submit" class="medium"><i class="fa fa-plus"></i> Add</button>
+          </form>
+        </div>
+        <br/>
+        <div>
+          <h4>Delete a category</h4>
+          <form action="/categories/del" method="post">
+            <p>Category name</p><select name="cat">
+              {% for row in table %}
+              <option value="{{ row[0] }}">{{ row[1] }}</option>
+              {% endfor %}
+            </select>
+            <br/><br/>
+            <p>Any books within this category will become uncategorized. This operation is not easily reverseable</p>
+            <input type="checkbox" id="confirm"/> I understand<br/><br/>
+            <button id="delete" type="submit" class="medium disabled" disabled><i class="fa fa-trash"></i> Delete</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+{% endblock %}
