@@ -14,7 +14,7 @@ DELETE FROM Category WHERE CategoryID = catID;
 summary report of books available in each category
   should include the number of book titles and average price
 */
-SELECT CategoryID, COUNT(*) AS count, CAST(AVG(Price) AS decimal(10,2)) AS average_price FROM Book GROUP BY CategoryID;
+SELECT CategoryID, COUNT(Book.CategoryID) AS count, CAST(AVG(Price) AS decimal(10,2)) AS average_price FROM Book GROUP BY CategoryID ORDER BY CategoryID;
 
 /* task 4
 given a publisher name, produce a report of books ordered by year and month

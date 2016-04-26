@@ -1,24 +1,12 @@
 {% extends "template.html" %}
-{% block title %}Categories{% endblock %}
-{% block head_js %}
-<script>
-$(document).ready(function() {
-  var confirm = $("#confirm");
-  if (confirm == null)
-    return;
-
-  confirm.change(function(){
-    if ($(this).is(':checked'))
-      $("#delete").removeClass("disabled").addClass("red").removeAttr("disabled");
-    else
-      $("#delete").removeClass("red").addClass("disabled").attr("disabled", true);
-  });
-});
-</script>
-{% endblock %}
+{% block title %}Custom query{% endblock %}
 {% block body %}
     <div class="grid flex">
       <div class="col_6">
+        <form action="/custom" method="post">
+          <input type="text" name="query"/>
+          <button type="submit" class="medium"><i class="fa fa-play"></i> Run</button>
+        </form>
         <table>
           <thead>
             <tr>
@@ -31,14 +19,14 @@ $(document).ready(function() {
             {% for row in table %}
             <tr>
               {% for cell in row %}
-              <td>{% if cell != None %}{{ cell }}{% endif %}</td>
+              <td>{{ cell }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <div class="col_6">
+      <!--div class="col_6">
         <div>
           <h4>Add new category</h4>
           <form action="/categories/add" method="post">
@@ -66,6 +54,6 @@ $(document).ready(function() {
             <button id="delete" type="submit" class="medium disabled" disabled><i class="fa fa-trash"></i> Delete</button>
           </form>
         </div>
-      </div>
+      </div-->
     </div>
 {% endblock %}

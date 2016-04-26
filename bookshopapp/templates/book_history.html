@@ -1,0 +1,26 @@
+{% extends "template.html" %}
+{% block title %}Book Order History{% endblock %}
+{% block body %}
+    <div class="grid flex">
+      <div class="col_6">
+        <table>
+          <thead>
+            <tr>
+              {% for h in head %}
+              <td>{{ h }}</td>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+{% endblock %}
