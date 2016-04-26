@@ -53,24 +53,41 @@ SELECT
 
 /* task 6
 given start and end dates, produce a report showing the performance of each sales rep over that period
-  report should beginw ith the rep who generated most orders by value and include total units sold and total order value
+  report should begin with the rep who generated most orders by value and include total units sold and total order value
   include all sales reps
 */
---SELECT
 SELECT
-  SalesRep.SalesRepID,
-  SalesRep.Name,
-  COALESCE(COUNT(DISTINCT(ShopOrder.ShopOrderID)), 0) AS num_orders,
-  COALESCE(SUM(UnitSellingPrice*Quantity), 0.0) AS total_order_value,
-  COALESCE(SUM(Quantity), 0) AS total_order_quantity
+  *
   FROM
+  (
+    SELECT
+      SalesRep.SalesRepID,
+      SalesRep.Name,
+      COALESCE(COUNT(DISTINCT(ShopOrder.ShopOrderID)), 0) AS num_orders,
+      COALESCE(SUM(UnitSellingPrice*Quantity), 0.0) AS total_order_value,
+      COALESCE(SUM(Quantity), 0) AS total_order_quantity
+    FROM
       SalesRep
     LEFT JOIN
       ShopOrder ON SalesRep.SalesRepID = ShopOrder.SalesRepID
     LEFT JOIN
       OrderLine ON ShopOrder.ShopOrderID = OrderLine.ShopOrderID
-  WHERE OrderDate IS NULL OR OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
-  GROUP BY SalesRep.SalesRepID ORDER BY total_order_value DESC
+    WHERE OrderDate IS NULL OR OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
+    GROUP BY SalesRep.SalesRepID
+  ) AS a
+  UNION
+  (
+    SELECT
+      b.SalesRepID,
+      Name,
+      0,
+      0.0,
+      0
+    FROM (
+      SELECT SalesRepID FROM SalesRep EXCEPT (SELECT DISTINCT(SalesRepID) FROM ShopOrder WHERE OrderDate > '2016-01-01' AND OrderDate < '2017-01-01')
+      ) AS b JOIN SalesRep ON b.SalesRepID = SalesRep.SalesRepID
+  )
+  ORDER BY total_order_value DESC
 
 /* task 7
 given a category id and discount percentage, apply a discount to the standard price of all books in that category
