@@ -1,7 +1,7 @@
 -- categories
 INSERT INTO Category VALUES ( 0, 'Fantasy', 'fiction');
 INSERT INTO Category VALUES ( 1, 'Science fiction', 'fiction');
-INSERT INTO Category VALUES ( 2, 'Poety', 'fiction');
+INSERT INTO Category VALUES ( 2, 'Poetry', 'fiction');
 INSERT INTO Category VALUES ( 3, 'Children''s', 'fiction');
 INSERT INTO Category VALUES ( 4, 'History', 'Non-fiction');
 INSERT INTO Category VALUES ( 5, 'Science', 'Non-fiction');
