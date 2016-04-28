@@ -2,11 +2,13 @@
 {% block title %}Custom query{% endblock %}
 {% block body %}
     <div class="grid flex">
-      <div class="col_6">
+      <div class="col_12">
         <form action="/custom" method="post">
           <input type="text" name="query"/>
           <button type="submit" class="medium"><i class="fa fa-play"></i> Run</button>
         </form>
+      </div>
+      <div class="col_12">
         <table>
           <thead>
             <tr>
