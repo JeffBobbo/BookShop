@@ -1,0 +1,33 @@
+{% extends "template.html" %}
+{% block title %}Discount {{ name }} books{% endblock %}
+{% block body %}
+    <div class="grid flex">
+      {% if done %}
+      <div class="col_12">
+      <p>Applied changes to {{count}} books, from the {{name}} category.</p>
+      </div>
+      {% endif %}
+      <div class="col_6">
+        <h4>Apply a discount to {{ name }} books</h4>
+        <p>The discount will be applied to all books within the category with immediate effect.</p>
+        <p>This change will effect {{ count }} books.</p>
+        <form action="/categories/discount/{{ id }}" method="post">
+          <input type="number" min="0.0" max="100.0" name="discount"/> % off
+          <br/>
+          <br/>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      <div class="col_6">
+        <h4>Reverse a discount to {{ name }} books</h4>
+        <p>Enter the amount the original discount was to reverse it's effects</p>
+        <p>This change will effect {{ count }} books.</p>
+        <form action="/categories/discount/{{ id }}" method="post">
+          <input type="number" min="0.0" max="100.0" name="undiscount"/> % off
+          <br/>
+          <br/>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+{% endblock %}

@@ -3,11 +3,7 @@
 {% block head_js %}
 <script>
 $(document).ready(function() {
-  var confirm = $("#confirm");
-  if (confirm == null)
-    return;
-
-  confirm.change(function(){
+  $("#confirm").change(function() {
     if ($(this).is(':checked'))
       $("#delete").removeClass("disabled").addClass("red").removeAttr("disabled");
     else
@@ -18,27 +14,49 @@ $(document).ready(function() {
 {% endblock %}
 {% block body %}
     <div class="grid flex">
-      <div class="col_6">
+      <div class="col_9">
         <table>
           <thead>
             <tr>
               {% for h in head %}
               <td>{{ h }}</td>
               {% endfor %}
+              <td>apply/remove discount</td>
             </tr>
           </thead>
           <tbody>
-            {% for row in table %}
+            {% for row in rows %}
             <tr>
               {% for cell in row %}
-              <td>{% if cell != None %}{{ cell }}{% endif %}</td>
+              <td>{% if cell != None %}{{ cell }}{% endif %}</td> {# don't write out None's #}
+              {% endfor %}
+              <td><a href="/categories/discount/{{row[0]}}">discount</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <h4>Summary</h4>
+        <table>
+          <thead>
+            <tr>
+              {% for h in shead %}
+              <td>{{ h }}</td>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in srows %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <div class="col_6">
+      <div class="col_3">
         <div>
           <h4>Add new category</h4>
           <form action="/categories/add" method="post">
@@ -56,8 +74,10 @@ $(document).ready(function() {
           <h4>Delete a category</h4>
           <form action="/categories/del" method="post">
             <p>Category name</p><select name="cat">
-              {% for row in table %}
+              {% for row in rows %}
+              {% if row[0] != None %} {# don't include Uncategorized #}
               <option value="{{ row[0] }}">{{ row[1] }}</option>
+              {% endif %}
               {% endfor %}
             </select>
             <br/><br/>

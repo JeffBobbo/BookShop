@@ -2,7 +2,7 @@
 {% block title %}Books{% endblock %}
 {% block body %}
     <div class="grid flex">
-      <div class="col_6">
+      <div class="col_12">
         <table>
           <thead>
             <tr>
@@ -13,7 +13,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for row in table %}
+            {% for row in rows %}
             <tr>
               {% for cell in row %}
               <td>{{ cell }}</td>
@@ -23,7 +23,6 @@
             {% endfor %}
           </tbody>
         </table>
-      </div>
       <!--div class="col_6">
         <div>
           <h4>Add new category</h4>

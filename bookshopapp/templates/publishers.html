@@ -1,26 +1,24 @@
 {% extends "template.html" %}
-{% block title %}Custom query{% endblock %}
+{% block title %}Publishers{% endblock %}
 {% block body %}
     <div class="grid flex">
-      <div class="col_6">
-        <form action="/custom" method="post">
-          <input type="text" name="query"/>
-          <button type="submit" class="medium"><i class="fa fa-play"></i> Run</button>
-        </form>
+      <div class="col_12">
         <table>
           <thead>
             <tr>
               {% for h in head %}
               <td>{{ h }}</td>
               {% endfor %}
+              <td>order history</td>
             </tr>
           </thead>
           <tbody>
-            {% for row in table %}
+            {% for row in rows %}
             <tr>
               {% for cell in row %}
-              <td>{{ cell }}</td>
+              <td>{% if cell != None %}{{ cell }}{% endif %}</td>
               {% endfor %}
+              <td><a href="/publishers/history/{{row[0]}}">view</a></td>
             </tr>
             {% endfor %}
           </tbody>

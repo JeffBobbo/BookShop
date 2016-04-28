@@ -1,0 +1,56 @@
+{% extends "template.html" %}
+{% block title %}Sales Reps{% endblock %}
+{% block head_css %}
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+{% endblock %}
+{% block head_js %}
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script>
+$(document).ready(function() {
+  $("#dateFrom").datepicker();
+  $("#dateFrom").datepicker("option", "dateFormat", "d/m/yy");
+  $("#dateTo").datepicker();
+  $("#dateTo").datepicker("option", "dateFormat", "d/m/yy");
+});
+  </script>
+{% endblock %}
+
+{% block body %}
+    <div class="grid flex">
+      <div class="col_12">
+        <h4>Performance of all sales reps over period</h4>
+        <form action="/salesreps" method="post">
+          <p>From</p><input type="text" id="dateFrom" name="from"/>
+          <p>To</p><input type="text" id="dateTo" name="to"/>
+          <br/>
+          <br/>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      {% if fromDate %}
+      <div class="col_12">
+        <h4>Performance</h4>
+        <p>From {{ fromDate }} to {{ toDate }}</p>
+        <table>
+          <thead>
+            <tr>
+              {% for h in head %}
+              <td>{{ h }}</td>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+{% endblock %}
