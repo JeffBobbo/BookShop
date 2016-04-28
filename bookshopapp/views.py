@@ -44,12 +44,12 @@ ORDER BY CategoryID""")
     cur.execute("SELECT COUNT(Book.BookID) AS total_book_count, CAST(COALESCE(SUM(Price), 0.0) AS decimal(10,2)) AS total_price FROM Category LEFT JOIN Book ON Category.CategoryID = Book.CategoryID")
 
     shead = [desc[0] for desc in cur.description]
-    srows = cur.fetchall();
+    srows = cur.fetchall()
 
     # what should the next book ID be? Be simple, go with the current max+1
     # or 0, if there is no max
     cur.execute("SELECT COALESCE(MAX(CategoryID) + 1, 0) FROM Category")
-    nextID = cur.fetchall()[0][0];
+    nextID = cur.fetchall()[0][0]
 
     return render_template("categories.html", head=head, rows=rows, shead=shead, srows=srows, nextID=nextID)
   except Exception as e:
@@ -102,7 +102,7 @@ def categoriesDiscount(cid):
     con, cur = getConnection()
 
     cname = "Uncategorized"
-    count = 0;
+    count = 0
     # get the category name
     if cid >= 0: # if the cid is >= 0, then get the name of the category and the number of books
       cur.execute("SELECT Name FROM Category WHERE CategoryID = %s", [cid])
@@ -140,38 +140,12 @@ def publishers():
   try:
     con, cur = getConnection()
 
-    # this is task three, combined with some extra stuff
-    # we want everything from the category
-    # and we want the count of books in each category
-    # and the average price
-    # also union, because we want to include books which have no category
-#    cur.execute("""SELECT
-#  Book.*,
-#  COUNT(Book.BookID) AS num_orders,
-#  SUM(Quantity) AS quant_orderd,
-#  TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') AS order_month,
-#  SUM(Price*Quantity) AS retail_price,
-#  SUM(UnitSellingPrice*Quantity) AS selling_price
-#  FROM Book,OrderLine,ShopOrder
-#  WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
-#    PublisherID = (SELECT PublisherID FROM Publisher WHERE Name = 'HarperCollins')
-#  GROUP BY Book.BookID, TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM')
-#  ORDER BY TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') DESC
-#""")
     cur.execute("SELECT *, (SELECT COUNT(BookID) FROM Book WHERE Book.PublisherID = Publisher.PublisherID) AS book_count FROM Publisher")
 
     head = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
 
-#    shead = [desc[0] for desc in cur.description]
-#    srows = cur.fetchall();
-
-    # what should the next book ID be? Be simple, go with the current max+1
-    # or 0, if there is no max
-    cur.execute("SELECT COALESCE(MAX(PublisherID) + 1, 0) FROM Publisher")
-    nextID = cur.fetchall()[0][0];
-
-    return render_template("publishers.html", head=head, rows=rows, nextID=nextID)
+    return render_template("publishers.html", head=head, rows=rows)
   except Exception as e:
     return render_template("index.html", msg=e)
   finally:
@@ -195,8 +169,7 @@ def publisherHistory(pid):
   WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
     PublisherID = (SELECT PublisherID FROM Publisher WHERE PublisherID = %s)
   GROUP BY Book.BookID, TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM')
-  ORDER BY TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') DESC
-""", [pid])
+  ORDER BY TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') DESC""", [pid])
 
     head = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
@@ -308,7 +281,7 @@ def salesReps():
       ShopOrder ON SalesRep.SalesRepID = ShopOrder.SalesRepID
     LEFT JOIN
       OrderLine ON ShopOrder.ShopOrderID = OrderLine.ShopOrderID
-    WHERE OrderDate IS NULL OR OrderDate > %(from)s AND OrderDate < %(to)s
+    WHERE OrderDate IS NULL OR OrderDate BETWEEN %(from)s AND  %(to)s
     GROUP BY SalesRep.SalesRepID
   ) AS a
   UNION
@@ -320,7 +293,7 @@ def salesReps():
       0.0,
       0
     FROM (
-      SELECT SalesRepID FROM SalesRep EXCEPT (SELECT DISTINCT(SalesRepID) FROM ShopOrder WHERE OrderDate > %(from)s AND OrderDate < %(to)s)
+      SELECT SalesRepID FROM SalesRep EXCEPT (SELECT DISTINCT(SalesRepID) FROM ShopOrder WHERE OrderDate BETWEEN %(from)s AND %(to)s)
       ) AS b JOIN SalesRep ON b.SalesRepID = SalesRep.SalesRepID
   )
   ORDER BY total_order_value DESC""", {'from': fromDate, 'to': toDate})
@@ -328,7 +301,7 @@ def salesReps():
     head = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
 
-    return render_template("salesreps.html", head=head, table=rows, fromDate=fromDate, toDate=toDate);
+    return render_template("salesreps.html", head=head, table=rows, fromDate=fromDate, toDate=toDate)
   except Exception as e:
     return render_template("index.html", msg=e)
   finally:
@@ -341,7 +314,7 @@ def salesReps():
 @app.route('/custom', methods=["GET", "POST"])
 def custom():
   if request.method == "GET":
-    return render_template("custom.html");
+    return render_template("custom.html")
 
   try:
     con, cur = getConnection()
@@ -351,7 +324,7 @@ def custom():
     head = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
     con.rollback()
-    return render_template("custom.html", head=head, table=rows);
+    return render_template("custom.html", head=head, table=rows)
   except Exception as e:
     return render_template("index.html", msg=e)
   finally:
