@@ -3,25 +3,42 @@
 /* task 1
 Create new categories (from id, name and type)
 */
-INSERT INTO Category VALUES (catID, catName, catType);
+INSERT INTO Category VALUES (%s, %s, %s);
 
 /* task 2
 Given a category id, remove that category
 */
-DELETE FROM Category WHERE CategoryID = catID;
+DELETE FROM Category WHERE CategoryID = %s;
 
 /* task 3
 summary report of books available in each category
   should include the number of book titles and average price
 */
-SELECT CategoryID, COUNT(Book.CategoryID) AS count, CAST(AVG(Price) AS decimal(10,2)) AS average_price FROM Book GROUP BY CategoryID ORDER BY CategoryID;
+SELECT * FROM
+  (SELECT
+    Category.*,
+    COUNT(Book.CategoryID) AS book_count,
+    CAST(COALESCE(AVG(Price), 0.0) AS decimal(10,2)) AS average_price
+  FROM Category LEFT JOIN Book ON Category.CategoryID = Book.CategoryID
+  GROUP BY Category.CategoryID ORDER BY Category.CategoryID
+  ) AS a
+  UNION
+  (SELECT
+     NULL,
+    'Uncategorized',
+    'N/A',
+    COUNT(Book.CategoryID),
+    CAST(COALESCE(AVG(Price), 0.0) AS decimal(10,2))
+ FROM Book WHERE CategoryID IS NULL)
+ORDER BY CategoryID
 
 /* task 4
 given a publisher name, produce a report of books ordered by year and month
   for each year and month, the report should show bookid, title, total number of orders, total quantity and total selling value (order and retail)
 */
 SELECT
-  Book.*,
+  Book.BookID,
+  Book.Title,
   COUNT(Book.BookID) AS num_orders,
   SUM(Quantity) AS quant_orderd,
   TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') AS order_month,
@@ -29,9 +46,19 @@ SELECT
   SUM(UnitSellingPrice*Quantity) AS selling_price
   FROM Book,OrderLine,ShopOrder
   WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
-    PublisherID = (SELECT PublisherID FROM Publisher WHERE Name = 'HarperCollins')
+    PublisherID = (SELECT PublisherID FROM Publisher WHERE PublisherID = %s)
   GROUP BY Book.BookID, TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM')
   ORDER BY TO_CHAR(ShopOrder.OrderDate, 'YYYY-MM') DESC
+
+# summary
+SELECT
+  COUNT(Book.BookID) AS total_orders,
+  SUM(Quantity) AS total_quant_ordered,
+  SUM(Price*Quantity) AS total_retail_price,
+  SUM(UnitSellingPrice*Quantity) AS total_selling_price
+    FROM Book,OrderLine,ShopOrder
+  WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
+    PublisherID = (SELECT PublisherID FROM Publisher WHERE PublisherID = %s)
 
 /* task 5
 given a book id, produce the order history for that book
@@ -49,7 +76,10 @@ SELECT
   (SELECT order_value FROM order_value WHERE ShopOrderID = ShopOrder.ShopOrderID)
   FROM Book,OrderLine,ShopOrder
   WHERE Book.BookID = OrderLine.BookID AND OrderLine.ShopOrderID = ShopOrder.ShopOrderID AND
-    Book.BookID = 3
+    Book.BookID = %s
+
+# summary
+SELECT COUNT(*) AS total_sold, SUM(UnitSellingPrice) AS total_selling_value FROM OrderLine WHERE BookID = %s
 
 /* task 6
 given start and end dates, produce a report showing the performance of each sales rep over that period
@@ -72,7 +102,7 @@ SELECT
       ShopOrder ON SalesRep.SalesRepID = ShopOrder.SalesRepID
     LEFT JOIN
       OrderLine ON ShopOrder.ShopOrderID = OrderLine.ShopOrderID
-    WHERE OrderDate IS NULL OR OrderDate > '2016-01-01' AND OrderDate < '2017-01-01'
+    WHERE OrderDate IS NULL OR OrderDate BETWEEN %(from)s AND  %(to)s
     GROUP BY SalesRep.SalesRepID
   ) AS a
   UNION
@@ -84,7 +114,7 @@ SELECT
       0.0,
       0
     FROM (
-      SELECT SalesRepID FROM SalesRep EXCEPT (SELECT DISTINCT(SalesRepID) FROM ShopOrder WHERE OrderDate > '2016-01-01' AND OrderDate < '2017-01-01')
+      SELECT SalesRepID FROM SalesRep EXCEPT (SELECT DISTINCT(SalesRepID) FROM ShopOrder WHERE OrderDate BETWEEN %(from)s AND %(to)s)
       ) AS b JOIN SalesRep ON b.SalesRepID = SalesRep.SalesRepID
   )
   ORDER BY total_order_value DESC
@@ -93,8 +123,8 @@ SELECT
 given a category id and discount percentage, apply a discount to the standard price of all books in that category
 */
 -- non-mutating version
-SELECT BookID, Title, CAST(Price * (1 - (discount / 100.0)) AS decimal(10,2)) AS Price, CategoryID, PublisherID FROM Book WHERE CategoryID = catID;
+SELECT BookID, Title, CAST(Price * (1 - (%s / 100.0)) AS decimal(10,2)) AS Price, CategoryID, PublisherID FROM Book WHERE CategoryID = %s;
 -- mutating version
 UPDATE Book
-  SET Price = CAST(Price * (1 - (discount / 100.0)) AS decimal(10,2))
-  WHERE CategoryID = catID;
+  SET Price = CAST(Price * (1 - (%s / 100.0)) AS decimal(10,2))
+  WHERE CategoryID = %s
